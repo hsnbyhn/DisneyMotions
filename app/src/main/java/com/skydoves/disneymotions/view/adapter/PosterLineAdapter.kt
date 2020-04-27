@@ -17,19 +17,23 @@
 package com.skydoves.disneymotions.view.adapter
 
 import android.view.View
-import com.skydoves.baserecyclerviewadapter.BaseAdapter
 import com.skydoves.baserecyclerviewadapter.SectionRow
 import com.skydoves.disneymotions.R
+import com.skydoves.disneymotions.base.BaseDraggableListAdapter
+import com.skydoves.disneymotions.base.ItemDragListener
 import com.skydoves.disneymotions.model.Poster
 import com.skydoves.disneymotions.view.viewholder.PosterLineViewHolder
 
-class PosterLineAdapter : BaseAdapter() {
+class PosterLineAdapter(
+        override var listener: ItemDragListener
+) : BaseDraggableListAdapter(listener) {
 
   init {
     addSection(arrayListOf<Poster>())
   }
 
   fun addPosterList(posters: List<Poster>) {
+    this.posters = posters
     sections().first().run {
       clear()
       addAll(posters)

@@ -20,23 +20,40 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ItemTouchHelper
+import com.skydoves.baserecyclerviewadapter.BaseViewHolder
 import com.skydoves.disneymotions.R
 import com.skydoves.disneymotions.base.DatabindingFragment
+import com.skydoves.disneymotions.base.ItemDragListener
+import com.skydoves.disneymotions.callback.ItemMoveCallbackListener
 import com.skydoves.disneymotions.databinding.FragmentRadioBinding
 import com.skydoves.disneymotions.view.adapter.PosterCircleAdapter
 import org.koin.android.viewmodel.ext.android.getViewModel
 
-class RadioFragment : DatabindingFragment() {
+class RadioFragment : DatabindingFragment(), ItemDragListener {
+
+  private lateinit var touchHelper: ItemTouchHelper
 
   override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
+          inflater: LayoutInflater,
+          container: ViewGroup?,
+          savedInstanceState: Bundle?
   ): View? {
-    return binding<FragmentRadioBinding>(inflater, R.layout.fragment_radio, container).apply {
+
+    val posterCircleAdapter = PosterCircleAdapter(this)
+
+    val binding = binding<FragmentRadioBinding>(inflater, R.layout.fragment_radio, container).apply {
       viewModel = getViewModel<MainViewModel>().apply { fetchDisneyPosterList() }
       lifecycleOwner = this@RadioFragment
-      adapter = PosterCircleAdapter()
-    }.root
+      adapter = posterCircleAdapter
+    }
+    val callBack = ItemMoveCallbackListener(posterCircleAdapter)
+    touchHelper = ItemTouchHelper(callBack)
+    touchHelper.attachToRecyclerView(binding.recyclerView)
+    return binding.root
+  }
+
+  override fun onDragStart(viewHolder: BaseViewHolder) {
+    touchHelper.startDrag(viewHolder)
   }
 }

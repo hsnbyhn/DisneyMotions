@@ -20,23 +20,40 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ItemTouchHelper
+import com.skydoves.baserecyclerviewadapter.BaseViewHolder
 import com.skydoves.disneymotions.R
 import com.skydoves.disneymotions.base.DatabindingFragment
 import com.skydoves.disneymotions.databinding.FragmentHomeBinding
+import com.skydoves.disneymotions.base.ItemDragListener
+import com.skydoves.disneymotions.callback.ItemMoveCallbackListener
 import com.skydoves.disneymotions.view.adapter.PosterAdapter
 import org.koin.android.viewmodel.ext.android.getViewModel
 
-class HomeFragment : DatabindingFragment() {
+class HomeFragment : DatabindingFragment(), ItemDragListener {
+
+  private lateinit var touchHelper: ItemTouchHelper
 
   override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
+          inflater: LayoutInflater,
+          container: ViewGroup?,
+          savedInstanceState: Bundle?
   ): View? {
-    return binding<FragmentHomeBinding>(inflater, R.layout.fragment_home, container).apply {
+
+    val posterAdapter = PosterAdapter(this)
+
+    val binding = binding<FragmentHomeBinding>(inflater, R.layout.fragment_home, container).apply {
       viewModel = getViewModel<MainViewModel>().apply { fetchDisneyPosterList() }
       lifecycleOwner = this@HomeFragment
-      adapter = PosterAdapter()
-    }.root
+      adapter = posterAdapter
+    }
+    val callBack = ItemMoveCallbackListener(posterAdapter)
+    touchHelper = ItemTouchHelper(callBack)
+    touchHelper.attachToRecyclerView(binding.recyclerView)
+    return binding.root
+  }
+
+  override fun onDragStart(viewHolder: BaseViewHolder) {
+    touchHelper.startDrag(viewHolder)
   }
 }
